@@ -17,7 +17,7 @@ router.get("/", (req, res) => {
     });
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", validatePostId, (req, res) => {
   Posts.getById(req.params.id)
     .then((post) => {
       if (post) {
@@ -33,7 +33,7 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validatePostId, (req, res) => {
   Posts.remove(req.params.id)
     .then((count) => {
       if (count > 0) {
@@ -52,7 +52,7 @@ router.delete("/:id", (req, res) => {
 });
 
 
-router.put("/:id", (req, res) => {
+router.put("/:id", validatePostId, (req, res) => {
   Posts.update(req.params.id, req.body)
     .then((post) => {
       if (post) {
@@ -73,7 +73,11 @@ router.put("/:id", (req, res) => {
 // custom middleware
 
 function validatePostId(req, res, next) {
-  // do your magic!
+  if(req.params.id) {
+    next()
+  } else {
+    res.status(404).json({ message: "Could not validate post id." });   
+  }
 }
 
 module.exports = router;

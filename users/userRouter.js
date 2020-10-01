@@ -4,7 +4,17 @@ const Users = require("./userDb");
 const router = express.Router();
 
 router.post('/', (req, res) => {
-
+  Users.add(req.body)
+  .then((user) => {
+    res.status(201).json(user);
+  })
+  .catch((error) => {
+    // log error to server
+    console.log(error);
+    res.status(500).json({
+      message: "Error adding the user",
+    });
+  });
 });
 
 router.post('/:id/posts', (req, res) => {
@@ -24,7 +34,7 @@ router.get('/', (req, res) => {
     });
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validateUserId, (req, res) => {
   Users.getById(req.params.id)
     .then((user) => {
       if (user) {
@@ -45,7 +55,7 @@ router.get('/:id/posts', (req, res) => {
   // do your magic!
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
   Users.remove(req.params.id)
     .then((count) => {
       if (count > 0) {
@@ -63,7 +73,7 @@ router.delete('/:id', (req, res) => {
     });
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateUserId, (req, res) => {
   Users.update(req.params.id, req.body)
     .then((user) => {
       if (user) {
@@ -84,7 +94,11 @@ router.put('/:id', (req, res) => {
 //custom middleware
 
 function validateUserId(req, res, next) {
-  // do your magic!
+  if(req.params.id) {
+    next()
+  } else {
+    res.status(404).json({ message: "Could not validate user id." });   
+  }
 }
 
 function validateUser(req, res, next) {
